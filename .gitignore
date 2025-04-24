@@ -34,7 +34,8 @@ build/
 ### VS Code ###
 .vscode/
 
-src/main/java/org/Teacherly/.env
+.env
+src/test/resources/application.properties
 
 ### Mac OS ###
 .DS_Store

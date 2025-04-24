@@ -3,12 +3,15 @@ package org.Teacherly;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.retry.annotation.EnableRetry;
 
 @SpringBootApplication
+@EnableRetry
 public class Main {
     public static void main(String[] args) {
 
         Dotenv dotenv = Dotenv.load();
+
 
         System.setProperty("spring.data.mongodb.uri", dotenv.get("MONGO_URI"));
         System.setProperty("server.port", dotenv.get("PORT"));

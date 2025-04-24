@@ -28,7 +28,7 @@ public class AuthController {
 
     @Operation(summary = "login a user")
     @PostMapping("/login")
-    public ResponseEntity<UserResponse> login(@RequestBody UserLoginRequest request) {
+    public ResponseEntity<UserResponse> login(@RequestBody @Valid UserLoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
 
@@ -41,7 +41,7 @@ public class AuthController {
 
     @Operation(summary = "change password")
     @PostMapping("/forgot-password/change-password")
-    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request) {
+    public ResponseEntity<String> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
         authService.changePassword(request);
         return ResponseEntity.ok("Password changed");
     }

@@ -86,7 +86,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void changePassword(ChangePasswordRequest request) {
+    public void changePassword(@Valid ChangePasswordRequest request) {
         User user = userRepo.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("user not found with email " + request.getEmail()));
         user.setPassword(BCrypt.hashpw(request.getNewPassword(), BCrypt.gensalt()));

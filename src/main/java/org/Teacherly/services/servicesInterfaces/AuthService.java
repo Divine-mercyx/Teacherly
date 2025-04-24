@@ -10,5 +10,5 @@ public interface AuthService {
     UserResponse register(@Valid User user);
     UserResponse login(@Valid UserLoginRequest request);
     String sendOtp(String email);
-    void changePassword(ChangePasswordRequest request);
+    void changePassword(@Valid ChangePasswordRequest request);
 }
