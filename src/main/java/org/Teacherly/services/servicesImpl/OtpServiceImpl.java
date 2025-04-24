@@ -4,6 +4,7 @@ import org.Teacherly.data.models.Otp;
 import org.Teacherly.data.repositories.OtpRepo;
 import org.Teacherly.services.servicesInterfaces.OtpService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -12,10 +13,10 @@ import java.security.SecureRandom;
 public class OtpServiceImpl implements OtpService {
 
     @Autowired
-    private EmailServiceImpl emailServiceImpl;
+    private OtpRepo otpRepository;
 
     @Autowired
-    private OtpRepo otpRepository;
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     private static final SecureRandom random = new SecureRandom();
 
@@ -25,7 +26,8 @@ public class OtpServiceImpl implements OtpService {
         Otp otpObj = new Otp();
         otpObj.setCode(String.valueOf(otp));
         otpRepository.save(otpObj);
-        emailServiceImpl.sendSimpleMail(email, "OTP Code", otpObj.getCode());
+        String payload = String.format("{\"email\":\"%s\",\"code\":\"%s\"}", email, otpObj.getCode());
+        kafkaTemplate.send("otp-events", payload);
         return otpObj.getCode();
     }
 }

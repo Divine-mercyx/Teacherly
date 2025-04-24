@@ -34,5 +34,7 @@ build/
 ### VS Code ###
 .vscode/
 
+src/main/java/org/Teacherly/.env
+
 ### Mac OS ###
 .DS_Store
