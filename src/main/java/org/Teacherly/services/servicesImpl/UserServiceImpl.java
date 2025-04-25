@@ -11,6 +11,7 @@ import org.Teacherly.data.repositories.ProfileRepo;
 import org.Teacherly.data.repositories.SubscriptionRepo;
 import org.Teacherly.data.repositories.UserRepo;
 import org.Teacherly.data.repositories.VideoRepo;
+import org.Teacherly.dtos.request.GetAllVideosRequest;
 import org.Teacherly.dtos.request.ProfileUpdateRequest;
 import org.Teacherly.dtos.request.VideoPostRequest;
 import org.Teacherly.dtos.response.UserResponse;
@@ -21,7 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Validated
@@ -65,17 +68,34 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public VideoResponse PostVideo(VideoPostRequest request) {
+    public VideoResponse PostVideo(@Valid VideoPostRequest request) {
         validateTokenAndId(request.getToken(), request.getId());
+        Set<ConstraintViolation<VideoPostRequest>> violations = validator.validate(request);
+        if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
         User user = userRepo.findById(request.getId())
                 .orElseThrow(() -> new IllegalArgumentException("user not found"));
-        return getVideoResponse(request, user);
-    }
-
-    private VideoResponse getVideoResponse(VideoPostRequest request, User user) {
         Video video = request.getVideo();
         video.setUser(user);
         Video savedVideo = videoRepo.save(video);
+        return getVideoResponse(savedVideo);
+    }
+
+    @Override
+    public List<VideoResponse> getAllVideos(@Valid GetAllVideosRequest request) {
+        validateTokenAndId(request.getToken(), request.getId());
+        Set<ConstraintViolation<GetAllVideosRequest>> violations = validator.validate(request);
+        if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+        List<Video> videos = videoRepo.findAll();
+        return videos.stream()
+                .map(this::mapVideoToVideoResponse)
+                .collect(Collectors.toList());
+    }
+
+    private VideoResponse mapVideoToVideoResponse(Video video) {
+        return getVideoResponse(video);
+    }
+
+    private VideoResponse getVideoResponse(Video savedVideo) {
         return VideoResponse.builder()
                 .id(savedVideo.getId())
                 .title(savedVideo.getTitle())
@@ -90,5 +110,13 @@ public class UserServiceImpl implements UserService {
 
     private static UserResponse mapUserToUserResponse(String token, User savedUser) {
         return new UserResponse(token, savedUser.getId(), savedUser.getEmail(), savedUser.getProfile());
+    }
+
+    public void deleteAllVideos() {
+        videoRepo.deleteAll();
+    }
+
+    public void deleteAllProfile() {
+        profileRepo.deleteAll();
     }
 }
