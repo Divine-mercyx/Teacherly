@@ -77,4 +77,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 .build();
     }
 
+    public void deleteAll() {
+        subscriptionRepo.deleteAll();
+    }
+
 }
