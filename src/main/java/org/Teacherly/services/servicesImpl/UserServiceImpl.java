@@ -5,15 +5,15 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 import org.Teacherly.data.models.Profile;
+import org.Teacherly.data.models.Subscription;
 import org.Teacherly.data.models.User;
 import org.Teacherly.data.models.Video;
 import org.Teacherly.data.repositories.ProfileRepo;
 import org.Teacherly.data.repositories.SubscriptionRepo;
 import org.Teacherly.data.repositories.UserRepo;
 import org.Teacherly.data.repositories.VideoRepo;
-import org.Teacherly.dtos.request.GetAllVideosRequest;
-import org.Teacherly.dtos.request.ProfileUpdateRequest;
-import org.Teacherly.dtos.request.VideoPostRequest;
+import org.Teacherly.dtos.request.*;
+import org.Teacherly.dtos.response.SubscriberResponse;
 import org.Teacherly.dtos.response.UserResponse;
 import org.Teacherly.dtos.response.VideoResponse;
 import org.Teacherly.services.servicesInterfaces.UserService;
@@ -37,6 +37,9 @@ public class UserServiceImpl implements UserService {
     private UserRepo userRepo;
 
     @Autowired
+    private SubscriptionServiceImpl subscriptionService;
+
+    @Autowired
     private JwtUtils jwtUtils;
 
     @Autowired
@@ -51,9 +54,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse updateProfile(@Valid ProfileUpdateRequest request) {
-        validateTokenAndId(request.getToken(), request.getId());
-        Set<ConstraintViolation<Profile>> violations = validator.validate(request.getProfile());
+        Set<ConstraintViolation<ProfileUpdateRequest>> violations = validator.validate(request);
         if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+        validateTokenAndId(request.getToken(), request.getId());
         User user = userRepo.findById(request.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user"));
         Profile profile = profileRepo.save(request.getProfile());
@@ -69,9 +72,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public VideoResponse PostVideo(@Valid VideoPostRequest request) {
-        validateTokenAndId(request.getToken(), request.getId());
         Set<ConstraintViolation<VideoPostRequest>> violations = validator.validate(request);
         if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+        validateTokenAndId(request.getToken(), request.getId());
         User user = userRepo.findById(request.getId())
                 .orElseThrow(() -> new IllegalArgumentException("user not found"));
         Video video = request.getVideo();
@@ -82,13 +85,46 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<VideoResponse> getAllVideos(@Valid GetAllVideosRequest request) {
-        validateTokenAndId(request.getToken(), request.getId());
         Set<ConstraintViolation<GetAllVideosRequest>> violations = validator.validate(request);
         if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+        validateTokenAndId(request.getToken(), request.getId());
         List<Video> videos = videoRepo.findAll();
         return videos.stream()
                 .map(this::mapVideoToVideoResponse)
                 .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public Subscription subscribe(@Valid SubscribeRequest request) {
+        Set<ConstraintViolation<SubscribeRequest>> violations = validator.validate(request);
+        if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+        validateTokenAndId(request.getToken(), request.getId());
+        return subscriptionService.subscribe(request.getSubscription());
+    }
+
+    @Override
+    public void unSubscribe(@Valid SubscribeRequest request) {
+        Set<ConstraintViolation<SubscribeRequest>> violations = validator.validate(request);
+        if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+        validateTokenAndId(request.getToken(), request.getId());
+        subscriptionService.unsubscribe(request.getSubscription());
+    }
+
+    @Override
+    public List<SubscriberResponse> getSubscribers(@Valid GetSubscribersRequest request) {
+        Set<ConstraintViolation<GetSubscribersRequest>> violations = validator.validate(request);
+        if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+        validateTokenAndId(request.getToken(), request.getId());
+        return subscriptionService.getSubscribers(request.getId());
+    }
+
+    @Override
+    public List<SubscriberResponse> getSubscribedToUser(@Valid GetSubscribersRequest request) {
+        Set<ConstraintViolation<GetSubscribersRequest>> violations = validator.validate(request);
+        if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+        validateTokenAndId(request.getToken(), request.getId());
+        return subscriptionService.getSubscribedToUser(request.getId());
     }
 
     private VideoResponse mapVideoToVideoResponse(Video video) {
@@ -111,6 +147,7 @@ public class UserServiceImpl implements UserService {
     private static UserResponse mapUserToUserResponse(String token, User savedUser) {
         return new UserResponse(token, savedUser.getId(), savedUser.getEmail(), savedUser.getProfile());
     }
+
 
     public void deleteAllVideos() {
         videoRepo.deleteAll();

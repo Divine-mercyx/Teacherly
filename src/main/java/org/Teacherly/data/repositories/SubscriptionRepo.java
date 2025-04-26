@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface SubscriptionRepo extends MongoRepository<Subscription, String> {
     List<Subscription> findAllBySubscribedToUserId(String subscribedToId);
+    Subscription findBySubscribedToUserIdAndSubscriberUserId(String subscribedToUserId, String subscriberId);
 }
