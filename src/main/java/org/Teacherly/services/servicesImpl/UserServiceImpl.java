@@ -51,6 +51,11 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private Validator validator;
 
+    @Autowired
+    private EmailServiceImpl emailService;
+    @Autowired
+    private SubscriptionServiceImpl subscriptionServiceImpl;
+
 
     @Override
     public UserResponse updateProfile(@Valid ProfileUpdateRequest request) {
@@ -80,7 +85,18 @@ public class UserServiceImpl implements UserService {
         Video video = request.getVideo();
         video.setUser(user);
         Video savedVideo = videoRepo.save(video);
+        messageSubscribersOnPost(user);
         return getVideoResponse(savedVideo);
+    }
+
+    private void messageSubscribersOnPost(User user) {
+        List<SubscriberResponse> subscriptions = subscriptionServiceImpl.getSubscribers(user.getId());
+        subscriptions
+                .forEach(subscriberResponse -> sendUpdateToSubscribers(subscriberResponse, user));
+    }
+
+    private void sendUpdateToSubscribers(SubscriberResponse subscriber, User user) {
+        emailService.sendSimpleMail(subscriber.getEmail(), "teacherly update", String.format("%s posted a video check out", user.getProfile().getFirstName()));
     }
 
     @Override
