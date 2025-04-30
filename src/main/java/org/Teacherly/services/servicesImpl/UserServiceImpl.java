@@ -172,4 +172,9 @@ public class UserServiceImpl implements UserService {
     public void deleteAllProfile() {
         profileRepo.deleteAll();
     }
+
+    public User findById(String id) {
+        return userRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("user not found"));
+    }
 }

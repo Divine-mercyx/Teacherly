@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface SubscriptionService {
     Subscription subscribe(Subscription subscription);
-    void unsubscribe(Subscription subscription);
+    String unsubscribe(Subscription subscription);
     List<SubscriberResponse> getSubscribers(String userId);
     List<SubscriberResponse> getSubscribedToUser(String userId);
 }
