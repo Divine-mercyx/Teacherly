@@ -2,10 +2,8 @@ package org.Teacherly.controllers;
 
 import jakarta.validation.Valid;
 import org.Teacherly.data.models.Subscription;
-import org.Teacherly.dtos.request.GetAllVideosRequest;
-import org.Teacherly.dtos.request.ProfileUpdateRequest;
-import org.Teacherly.dtos.request.SubscribeRequest;
-import org.Teacherly.dtos.request.VideoPostRequest;
+import org.Teacherly.dtos.request.*;
+import org.Teacherly.dtos.response.SubscriberResponse;
 import org.Teacherly.dtos.response.UserResponse;
 import org.Teacherly.dtos.response.VideoResponse;
 import org.Teacherly.services.servicesInterfaces.UserService;
@@ -53,4 +51,13 @@ public class UserController {
         return ResponseEntity.ok("unsubscribe successfully");
     }
 
+    @GetMapping("/getSubscribers")
+    public ResponseEntity<List<SubscriberResponse>> getSubscribers(@RequestBody @Valid GetSubscribersRequest request) {
+        return ResponseEntity.ok(userService.getSubscribers(request));
+    }
+
+    @GetMapping("/subscribedTo")
+    public ResponseEntity<List<SubscriberResponse>> getSubscribedTo(@RequestBody @Valid GetSubscribersRequest request) {
+        return ResponseEntity.ok(userService.getSubscribedToUser(request));
+    }
 }
