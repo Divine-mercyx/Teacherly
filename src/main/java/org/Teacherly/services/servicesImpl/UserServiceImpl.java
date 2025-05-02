@@ -105,9 +105,25 @@ public class UserServiceImpl implements UserService {
         if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
         validateTokenAndId(request.getToken(), request.getId());
         List<Video> videos = videoRepo.findAll();
+        return getVideoResponses(videos);
+    }
+
+    private List<VideoResponse> getVideoResponses(List<Video> videos) {
         return videos.stream()
                 .map(this::mapVideoToVideoResponse)
                 .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public List<VideoResponse> getAllVideoPostedByUser(@Valid GetAllVideosRequest request) {
+        Set<ConstraintViolation<GetAllVideosRequest>> violations = validator.validate(request);
+        if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+        validateTokenAndId(request.getToken(), request.getId());
+        User user = userRepo.findById(request.getId())
+                .orElseThrow(() -> new IllegalArgumentException("user not found"));
+        List<Video> videos = videoRepo.findByUser(user);
+        return getVideoResponses(videos);
     }
 
 

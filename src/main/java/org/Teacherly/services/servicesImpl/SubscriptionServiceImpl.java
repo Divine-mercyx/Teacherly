@@ -36,11 +36,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if (user.getProfile().getSubscribersUserIds() == null) user.getProfile().setSubscribersUserIds(new ArrayList<>());
         profileRepo.save(user.getProfile());
         Profile profile = profileRepo.findById(user.getProfile().getId()).orElseThrow(() -> new IllegalArgumentException("Profile not found"));
+        addSubscribersToListAndSave(subscription, profile, user);
+        return subscriptionRepo.save(subscription);
+    }
+
+    private void addSubscribersToListAndSave(Subscription subscription, Profile profile, User user) {
         profile.getSubscribersUserIds().add(subscription.getSubscriberUserId());
         Profile savedProfile = profileRepo.save(profile);
         user.setProfile(savedProfile);
-        log.info(userRepo.save(user).toString());
-        return subscriptionRepo.save(subscription);
     }
 
     @Override
@@ -49,15 +52,19 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         if (user.getProfile().getSubscribersUserIds() == null) user.getProfile().setSubscribersUserIds(new ArrayList<>());
         profileRepo.save(user.getProfile());
-        Profile profile = profileRepo.findById(user.getProfile().getId()).orElseThrow(() -> new IllegalArgumentException("Profile not found"));
-        profile.getSubscribersUserIds().remove(subscription.getSubscriberUserId());
-        Profile savedProfile = profileRepo.save(profile);
-        user.setProfile(savedProfile);
+        removeSubscriberFromListAndSave(subscription, user);
         userRepo.save(user);
         Subscription subscription1 = subscriptionRepo
                 .findBySubscribedToUserIdAndSubscriberUserId(subscription.getSubscribedToUserId(), subscription.getSubscriberUserId());
         subscriptionRepo.delete(subscription1);
         return "deleted successfully";
+    }
+
+    private void removeSubscriberFromListAndSave(Subscription subscription, User user) {
+        Profile profile = profileRepo.findById(user.getProfile().getId()).orElseThrow(() -> new IllegalArgumentException("Profile not found"));
+        profile.getSubscribersUserIds().remove(subscription.getSubscriberUserId());
+        Profile savedProfile = profileRepo.save(profile);
+        user.setProfile(savedProfile);
     }
 
 

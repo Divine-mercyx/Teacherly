@@ -13,6 +13,7 @@ public interface UserService {
     UserResponse updateProfile(@Valid ProfileUpdateRequest request);
     VideoResponse PostVideo(@Valid VideoPostRequest request);
     List<VideoResponse> getAllVideos(@Valid GetAllVideosRequest request);
+    List<VideoResponse> getAllVideoPostedByUser(@Valid GetAllVideosRequest request);
     Subscription subscribe(@Valid SubscribeRequest request);
     void unSubscribe(@Valid SubscribeRequest request);
     List<SubscriberResponse> getSubscribers(@Valid GetSubscribersRequest request);

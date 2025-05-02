@@ -1,8 +1,10 @@
 package org.Teacherly.controllers;
 
 import jakarta.validation.Valid;
+import org.Teacherly.data.models.Subscription;
 import org.Teacherly.dtos.request.GetAllVideosRequest;
 import org.Teacherly.dtos.request.ProfileUpdateRequest;
+import org.Teacherly.dtos.request.SubscribeRequest;
 import org.Teacherly.dtos.request.VideoPostRequest;
 import org.Teacherly.dtos.response.UserResponse;
 import org.Teacherly.dtos.response.VideoResponse;
@@ -34,4 +36,21 @@ public class UserController {
     public ResponseEntity<List<VideoResponse>> getVideos(@RequestBody @Valid GetAllVideosRequest request) {
         return ResponseEntity.ok(userService.getAllVideos(request));
     }
+
+    @GetMapping("/myVideos")
+    public ResponseEntity<List<VideoResponse>> getMyVideos(@RequestBody @Valid GetAllVideosRequest request) {
+        return ResponseEntity.ok(userService.getAllVideoPostedByUser(request));
+    }
+
+    @PostMapping("/subscribe")
+    public ResponseEntity<Subscription> subscribe(@RequestBody @Valid SubscribeRequest request) {
+        return ResponseEntity.ok(userService.subscribe(request));
+    }
+
+    @PostMapping("/unsubscribe")
+    public ResponseEntity<String> unsubscribe(@RequestBody @Valid SubscribeRequest request) {
+        userService.unSubscribe(request);
+        return ResponseEntity.ok("unsubscribe successfully");
+    }
+
 }
